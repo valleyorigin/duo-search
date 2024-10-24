@@ -40,14 +40,37 @@ body {
     left: 20px;
 }
 
+/* 検索窓のスタイル */
+.search-container {
+    position: relative;
+    width: 100%;
+}
+
 input[type="text"] {
     width: 100%;
     padding: 15px;
     font-size: 18px;
-    margin: 60px 0 20px; /* タイトルの下に余白を確保 */
+    margin-bottom: 20px;
     border: 1px solid #ddd;
     border-radius: 5px;
     box-sizing: border-box;
+    padding-right: 40px; /* クリアボタン用の余白を確保 */
+}
+
+.clear-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.clear-btn:hover {
+    color: #000;
 }
 
 #weblioFrame {
@@ -115,37 +138,4 @@ iframe {
         flex-grow: 1;
         overflow-y: auto;
     }
-}
-
-/* 検索窓のスタイル */
-.search-container {
-    position: relative;
-    width: 100%;
-}
-
-input[type="text"] {
-    width: 100%;
-    padding: 15px;
-    font-size: 18px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box;
-    padding-right: 40px; /* クリアボタン用の余白を確保 */
-}
-
-.clear-btn {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #aaa;
-}
-
-.clear-btn:hover {
-    color: #000;
 }

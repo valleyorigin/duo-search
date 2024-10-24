@@ -1,43 +1,41 @@
-let data = [];
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById("searchInput");
+    const resultsContainer = document.getElementById("results");
+    const clearButton = document.getElementById("clearButton");
 
-// CSVデータの読み込み
-fetch('data.csv')
-    .then(response => response.text())
-    .then(csvText => {
-        data = csvText.trim().split('\n').slice(1).map(line => {
-            const [english, japanese] = line.split(/,(.+)/);
-            return { 
-                english: english.trim(), 
-                japanese: japanese.trim() 
-            };
+    // CSVデータの読み込み
+    fetch("data.csv")
+        .then(response => response.text())
+        .then(data => {
+            const csvLines = data.split("\n").slice(1);
+            const entries = csvLines.map((line, index) => {
+                const [english, japanese] = line.split(",");
+                return { number: index + 1, english, japanese };
+            });
+
+            // 検索機能
+            searchInput.addEventListener("input", function() {
+                const query = searchInput.value.trim().toLowerCase();
+                resultsContainer.innerHTML = "";
+
+                // 検索キーワードに基づきフィルタリング
+                const filteredEntries = entries.filter(entry => entry.english.toLowerCase().includes(query));
+
+                // 結果の表示
+                filteredEntries.forEach(entry => {
+                    const resultElement = document.createElement("p");
+                    resultElement.innerHTML = `<strong>${entry.number}</strong>. ${entry.english} - ${entry.japanese}`;
+                    resultsContainer.appendChild(resultElement);
+                });
+            });
+
+            // クリアボタンの機能
+            clearButton.addEventListener("click", function() {
+                searchInput.value = "";
+                resultsContainer.innerHTML = "";
+            });
+        })
+        .catch(error => {
+            console.error("CSV読み込みエラー:", error);
         });
-    })
-    .catch(error => console.error('CSV読み込みエラー:', error));
-
-// キーワード入力時の検索処理
-document.getElementById('searchInput').addEventListener('input', function (e) {
-    const keyword = e.target.value.trim().toLowerCase();
-
-    const results = data.filter(item =>
-        item.english.toLowerCase().includes(keyword) ||
-        item.japanese.includes(keyword)
-    );
-
-    const resultsDiv = document.getElementById('results');
-    if (results.length > 0) {
-        resultsDiv.innerHTML = results.map(item =>
-            `<p><strong>${item.english}</strong><br>${item.japanese}</p>`
-        ).join('');
-    } else {
-        resultsDiv.innerHTML = '<p>結果が見つかりませんでした。</p>';
-    }
-
-    // Weblioのページを同じ画面に表示
-    const weblioFrame = document.getElementById('weblioFrame');
-    if (keyword) {
-        const url = `https://ejje.weblio.jp/content/${encodeURIComponent(keyword)}`;
-        weblioFrame.innerHTML = `<iframe src="${url}"></iframe>`;
-    } else {
-        weblioFrame.innerHTML = '';
-    }
 });

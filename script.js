@@ -1,41 +1,31 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const searchInput = document.getElementById("searchInput");
-    const resultsContainer = document.getElementById("results");
-    const clearButton = document.getElementById("clearButton");
+/* 検索窓のスタイル */
+.search-container {
+    position: relative;
+    width: 100%;
+}
 
-    // CSVデータの読み込み
-    fetch("data.csv")
-        .then(response => response.text())
-        .then(data => {
-            const csvLines = data.split("\n").slice(1);
-            const entries = csvLines.map((line, index) => {
-                const [english, japanese] = line.split(",");
-                return { number: index + 1, english, japanese };
-            });
+input[type="text"] {
+    width: 100%;
+    padding: 15px 40px 15px 15px; /* 右側にクリアボタンの余白を確保 */
+    font-size: 18px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
 
-            // 検索機能
-            searchInput.addEventListener("input", function() {
-                const query = searchInput.value.trim().toLowerCase();
-                resultsContainer.innerHTML = "";
+.clear-btn {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+}
 
-                // 検索キーワードに基づきフィルタリング
-                const filteredEntries = entries.filter(entry => entry.english.toLowerCase().includes(query));
-
-                // 結果の表示
-                filteredEntries.forEach(entry => {
-                    const resultElement = document.createElement("p");
-                    resultElement.innerHTML = `<strong>${entry.number}</strong>. ${entry.english} - ${entry.japanese}`;
-                    resultsContainer.appendChild(resultElement);
-                });
-            });
-
-            // クリアボタンの機能
-            clearButton.addEventListener("click", function() {
-                searchInput.value = "";
-                resultsContainer.innerHTML = "";
-            });
-        })
-        .catch(error => {
-            console.error("CSV読み込みエラー:", error);
-        });
-});
+.clear-btn:hover {
+    color: #000;
+}

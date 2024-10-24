@@ -1,28 +1,22 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DUO例文検索</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <div class="left">
-            <h1 class="title">DUO例文検索</h1>
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="キーワードを入力してください...">
-                <button id="clearButton" class="clear-btn">&times;</button>
-            </div>
-            <div id="weblioFrame">
-                <iframe id="weblioIframe" src=""></iframe>
-            </div>
-        </div>
-        <div class="right">
-            <div id="results"></div>
-        </div>
-    </div>
+        <h1>DUO例文検索</h1>
+        <iframe id="weblioIframe" class="weblio"></iframe>
 
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="検索ワードを入力" />
+            <span id="clearButton" class="clear-btn">✕</span>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

@@ -40,6 +40,12 @@ body {
     left: 20px;
 }
 
+.search-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
 input[type="text"] {
     width: 100%;
     padding: 15px;
@@ -48,6 +54,20 @@ input[type="text"] {
     border: 1px solid #ddd;
     border-radius: 5px;
     box-sizing: border-box;
+}
+
+#clearButton {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+#clearButton:hover {
+    color: #555;
 }
 
 #weblioFrame {
@@ -78,7 +98,7 @@ iframe {
 }
 
 #results strong {
-    color: #007bff;
+    color: #333;
 }
 
 /* スマートフォン版のレイアウト */

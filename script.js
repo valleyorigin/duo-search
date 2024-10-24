@@ -1,72 +1,43 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const searchInput = document.getElementById("searchInput");
-    const resultsContainer = document.getElementById("results");
-    const clearButton = document.getElementById("clearButton");
-    const weblioIframe = document.getElementById("weblioIframe");
+let data = [];
 
-    // CSVデータの読み込み
-    fetch("data.csv")
-        .then(response => response.text())
-        .then(data => {
-            // 改行ごとにCSVを分割し、ヘッダー行をスキップ
-            const csvLines = data.split("\n").slice(1);
-
-            // 各行をダブルクオートとカンマを考慮してパースする
-            const entries = csvLines.map((line, index) => {
-                // 正規表現でダブルクオートとカンマを考慮して分割
-                const [english, japanese] = parseCSVLine(line);
-                return { number: index + 1, english, japanese };
-            });
-
-            // 検索機能
-            searchInput.addEventListener("input", function() {
-                const query = searchInput.value.trim().toLowerCase();
-                resultsContainer.innerHTML = "";
-
-                // Weblioページを更新
-                weblioIframe.src = `https://ejje.weblio.jp/content/${query}`;
-
-                // 検索キーワードに基づきフィルタリング
-                const filteredEntries = entries.filter(entry => entry.english.toLowerCase().includes(query));
-
-                // 結果の表示
-                filteredEntries.forEach(entry => {
-                    const resultElement = document.createElement("p");
-                    resultElement.innerHTML = `<strong>${entry.number}</strong>. ${entry.english} - ${entry.japanese}`;
-                    resultsContainer.appendChild(resultElement);
-                });
-            });
-
-            // クリアボタンの機能
-            clearButton.addEventListener("click", function() {
-                searchInput.value = "";
-                resultsContainer.innerHTML = "";
-                weblioIframe.src = "";
-            });
-        })
-        .catch(error => {
-            console.error("CSV読み込みエラー:", error);
+// CSVデータの読み込み
+fetch('data.csv')
+    .then(response => response.text())
+    .then(csvText => {
+        data = csvText.trim().split('\n').slice(1).map(line => {
+            const [english, japanese] = line.split(/,(.+)/);
+            return { 
+                english: english.trim(), 
+                japanese: japanese.trim() 
+            };
         });
+    })
+    .catch(error => console.error('CSV読み込みエラー:', error));
 
-    /**
-     * CSVの1行を解析して、各フィールドを分割する関数
-     * @param {string} line - CSVの1行の文字列
-     * @returns {Array<string>} - 分割されたフィールドの配列
-     */
-    function parseCSVLine(line) {
-        const regex = /("(?:[^"]|"")*"|[^,]*)(?=,|$)/g;
-        const result = [];
-        let match;
+// キーワード入力時の検索処理
+document.getElementById('searchInput').addEventListener('input', function (e) {
+    const keyword = e.target.value.trim().toLowerCase();
 
-        while ((match = regex.exec(line)) !== null) {
-            let field = match[0].trim();
-            // ダブルクオートで囲まれている場合、それを取り除く
-            if (field.startsWith('"') && field.endsWith('"')) {
-                field = field.slice(1, -1).replace(/""/g, '"');
-            }
-            result.push(field);
-        }
+    const results = data.filter(item =>
+        item.english.toLowerCase().includes(keyword) ||
+        item.japanese.includes(keyword)
+    );
 
-        return result;
+    const resultsDiv = document.getElementById('results');
+    if (results.length > 0) {
+        resultsDiv.innerHTML = results.map(item =>
+            `<p><strong>${item.english}</strong><br>${item.japanese}</p>`
+        ).join('');
+    } else {
+        resultsDiv.innerHTML = '<p>結果が見つかりませんでした。</p>';
+    }
+
+    // Weblioのページを同じ画面に表示
+    const weblioFrame = document.getElementById('weblioFrame');
+    if (keyword) {
+        const url = `https://ejje.weblio.jp/content/${encodeURIComponent(keyword)}`;
+        weblioFrame.innerHTML = `<iframe src="${url}"></iframe>`;
+    } else {
+        weblioFrame.innerHTML = '';
     }
 });

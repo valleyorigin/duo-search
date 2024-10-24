@@ -8,10 +8,13 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch("data.csv")
         .then(response => response.text())
         .then(data => {
-            const csvLines = data.split("\n").slice(1); // 最初のヘッダー行をスキップ
+            // 改行ごとにCSVを分割し、ヘッダー行をスキップ
+            const csvLines = data.split("\n").slice(1);
+
+            // 各行をカンマ区切りで分割して、カンマが含まれている場合でも正常に処理する
             const entries = csvLines.map((line, index) => {
-                const [english, japanese] = line.split(",");
-                // 行番号に基づいて、CSVの2行目を1としてカウント
+                // 正規表現でカンマ区切りを処理（カンマを含むデータも考慮）
+                const [english, japanese] = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(col => col.replace(/"/g, ''));
                 return { number: index + 1, english, japanese };
             });
 

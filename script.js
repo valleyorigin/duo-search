@@ -4,15 +4,28 @@ let data = [];
 fetch('data.csv')
     .then(response => response.text())
     .then(csvText => {
-        data = csvText.trim().split('\n').slice(1).map(line => {
-            const [english, japanese] = line.split(/,(.+)/);
-            return { 
-                english: english.trim(), 
-                japanese: japanese.trim() 
-            };
-        });
+        data = parseCSV(csvText);
     })
     .catch(error => console.error('CSV読み込みエラー:', error));
+
+// CSVの解析を行う関数
+function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const result = [];
+    lines.forEach((line) => {
+        // ダブルクオート内のコンマと改行を考慮してパース
+        const regex = /("([^"]*?)")|([^,]+)/g;
+        let match;
+        let fields = [];
+        while ((match = regex.exec(line)) !== null) {
+            fields.push(match[2] || match[3]);
+        }
+        if (fields.length === 2) {
+            result.push({ english: fields[0], japanese: fields[1] });
+        }
+    });
+    return result;
+}
 
 // キーワード入力時の検索処理
 document.getElementById('searchInput').addEventListener('input', function (e) {
@@ -39,7 +52,7 @@ function searchAndDisplayResults(keyword) {
         if (orSearch) {
             return keywords.some(k => englishMatch.includes(k) || japaneseMatch.includes(k));
         }
-        
+
         // AND検索
         return keywords.every(k => englishMatch.includes(k) || japaneseMatch.includes(k));
     });

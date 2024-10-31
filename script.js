@@ -5,42 +5,56 @@ fetch('data.csv')
     .then(response => response.text())
     .then(csvText => {
         data = parseCSV(csvText);
+        setupEventListeners();
     })
     .catch(error => console.error('CSV読み込みエラー:', error));
 
 // CSVの解析を行う関数
 function parseCSV(text) {
-    const lines = text.trim().split('\n');
+    const lines = text.split('\n');
     const result = [];
+    let currentLine = '';
+
     lines.forEach((line) => {
-        // ダブルクオート内のコンマと改行を考慮してパース
-        const regex = /("([^"]*?)")|([^,]+)/g;
-        let match;
-        let fields = [];
-        while ((match = regex.exec(line)) !== null) {
-            fields.push(match[2] || match[3]);
-        }
-        if (fields.length === 2) {
-            result.push({ english: fields[0], japanese: fields[1] });
+        currentLine += line;
+
+        // ダブルクオートの数を数えて、1行が閉じているか確認する
+        const quoteCount = (currentLine.match(/"/g) || []).length;
+        if (quoteCount % 2 === 0) {
+            // パース処理
+            const regex = /"([^"]*)"|([^,]+)/g;
+            let match;
+            let fields = [];
+            while ((match = regex.exec(currentLine)) !== null) {
+                fields.push(match[1] || match[2]);
+            }
+            if (fields.length === 2) {
+                result.push({ english: fields[1], japanese: fields[0] });
+            }
+            currentLine = ''; // リセット
+        } else {
+            // 改行を結合
+            currentLine += '\n';
         }
     });
+
     return result;
 }
 
-// キーワード入力時の検索処理
-document.getElementById('searchInput').addEventListener('input', function (e) {
-    searchAndDisplayResults(e.target.value.trim().toLowerCase());
-});
+// イベントリスナーの設定
+function setupEventListeners() {
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+        searchAndDisplayResults(e.target.value.trim().toLowerCase());
+    });
 
-// バツボタンで検索窓をクリア
-document.getElementById('clearButton').addEventListener('click', function () {
-    document.getElementById('searchInput').value = '';
-    searchAndDisplayResults('');
-});
+    document.getElementById('clearButton').addEventListener('click', function () {
+        document.getElementById('searchInput').value = '';
+        searchAndDisplayResults('');
+    });
+}
 
 // 検索処理と結果表示の関数
 function searchAndDisplayResults(keyword) {
-    // AND検索とOR検索を判定
     const orSearch = keyword.includes(' or ');
     const keywords = keyword.split(orSearch ? ' or ' : ' ');
 
@@ -48,27 +62,36 @@ function searchAndDisplayResults(keyword) {
         const englishMatch = item.english.toLowerCase();
         const japaneseMatch = item.japanese.toLowerCase();
 
-        // OR検索
         if (orSearch) {
             return keywords.some(k => englishMatch.includes(k) || japaneseMatch.includes(k));
         }
 
-        // AND検索
         return keywords.every(k => englishMatch.includes(k) || japaneseMatch.includes(k));
     });
 
+    displayResults(results);
+    displayWeblioFrame(keyword);
+}
+
+// 検索結果を表示する関数
+function displayResults(results) {
     const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '';
+
     if (results.length > 0) {
-        resultsDiv.innerHTML = results.map(item => {
-            // 元のCSVの行番号を取得（1から始まるインデックス）
+        results.forEach(item => {
             const originalIndex = data.findIndex(d => d.english === item.english && d.japanese === item.japanese) + 1;
-            return `<p><strong>${originalIndex} ${item.japanese}</strong><br>"${item.english}"</p>`;
-        }).join('');
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>${originalIndex} ${item.japanese}</strong><br>"${item.english}"`;
+            resultsDiv.appendChild(p);
+        });
     } else {
         resultsDiv.innerHTML = '<p>結果が見つかりませんでした。</p>';
     }
+}
 
-    // Weblioのページを同じ画面に表示
+// Weblioのフレームを表示する関数
+function displayWeblioFrame(keyword) {
     const weblioFrame = document.getElementById('weblioFrame');
     if (keyword) {
         const url = `https://ejje.weblio.jp/content/${encodeURIComponent(keyword)}`;

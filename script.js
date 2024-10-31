@@ -11,9 +11,10 @@ fetch('data.csv')
 
 // CSVの解析を行う関数
 function parseCSV(text) {
-    const lines = text.split('\n');
+    const lines = text.trim().split('\n');
     const result = [];
     let currentLine = '';
+    let lineNumber = 1; // 行番号を追跡
 
     lines.forEach((line) => {
         currentLine += line;
@@ -29,7 +30,8 @@ function parseCSV(text) {
                 fields.push(match[1] || match[2]);
             }
             if (fields.length === 2) {
-                result.push({ english: fields[1], japanese: fields[0] });
+                // 行番号も含めて格納
+                result.push({ index: lineNumber++, english: fields[1], japanese: fields[0] });
             }
             currentLine = ''; // リセット
         } else {
@@ -80,9 +82,8 @@ function displayResults(results) {
 
     if (results.length > 0) {
         results.forEach(item => {
-            const originalIndex = data.findIndex(d => d.english === item.english && d.japanese === item.japanese) + 1;
             const p = document.createElement('p');
-            p.innerHTML = `<strong>${originalIndex} ${item.japanese}</strong><br>"${item.english}"`;
+            p.innerHTML = `<strong>${item.index} ${item.japanese}</strong><br>"${item.english}"`;
             resultsDiv.appendChild(p);
         });
     } else {
